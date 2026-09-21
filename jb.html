@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en" manifest="cache.appcache">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GAME SHOP • PS4 13.52 Exploit Execution</title>
+  <link rel="icon" type="image/png" href="icon0.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <div class="main-wrapper">
+    <!-- Header: Seamless Title + Status Badges -->
+    <header class="header-card">
+      <h1 class="brand-title">GAME SHOP</h1>
+      <p class="brand-subtitle">PS4 Exploit Suite • GoldHEN Host (13.02 - 13.52)</p>
+      
+      <div class="badges-row">
+        <span class="badge badge-primary" id="badgeFw">🎮 Detecting System...</span>
+        <span class="badge badge-info" id="badgeEngine">⚙️ POOPS / RTHDR</span>
+        <span class="badge badge-success" id="cacheBadge">🛡️ Offline Ready</span>
+        <span class="badge badge-secondary">👑 GoldHEN Ready</span>
+      </div>
+    </header>
+
+    <!-- Centerpiece DualShock 4 Controller -->
+    <!-- Centerpiece Animated Game Shop Banner -->
+    <div class="banner-stage">
+      <img src="gameshop_animated.gif" alt="GAME SHOP PS4 Exploit Banner" class="banner-animated-img">
+    </div>
+
+    <!-- Action Launch Status -->
+    <div class="action-container">
+      <button id="jailbreakBtn" class="launch-btn" disabled>
+        <span>⚙️ Running Exploit...</span>
+      </button>
+    </div>
+
+    <!-- Futuristic Neon Progress Bar -->
+    <div class="progress-card">
+      <div class="progress-header">
+        <div class="progress-status-text" id="progressStatus">
+          <span id="statusIcon">⚡</span>
+          <span id="statusLabel">Initializing exploit kernel pipeline...</span>
+        </div>
+        <span class="progress-percentage" id="progressPct">10%</span>
+      </div>
+
+      <div class="progress-track">
+        <div class="progress-fill" id="progressBar" style="width: 10%;"></div>
+      </div>
+
+      <!-- Live Debug Console -->
+      <button type="button" class="debug-drawer-toggle" onclick="toggleDebugConsole()">
+        Show / Hide Console Log
+      </button>
+      <div class="debug-console" id="debugConsole"></div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+      <div><strong>GAME SHOP HOST (13.52)</strong> • Developed & Maintained by Ahmed Elattar</div>
+    </footer>
+  </div>
+
+  <!-- Telemetry and Log Elements for jb.js Compatibility -->
+  <div id="out" style="display:none;"></div>
+  <span id="state" style="display:none;"></span>
+  <div id="msg" style="display:none;"></div>
+  <div id="spin" style="display:none;"></div>
+
+  <script>
+    const badgeFw = document.getElementById("badgeFw");
+    const badgeEngine = document.getElementById("badgeEngine");
+    const cacheBadge = document.getElementById("cacheBadge");
+    const jailbreakBtn = document.getElementById("jailbreakBtn");
+    const statusLabel = document.getElementById("statusLabel");
+    const progressPct = document.getElementById("progressPct");
+    const progressBar = document.getElementById("progressBar");
+    const debugConsole = document.getElementById("debugConsole");
+
+    function setProgress(percent, message = null) {
+      const p = Math.min(100, Math.max(0, percent));
+      progressBar.style.width = p + "%";
+      progressPct.textContent = p + "%";
+      if (message) {
+        statusLabel.textContent = message;
+        logToDebug("[STATUS] " + message);
+      }
+    }
+
+    function logToDebug(msg) {
+      if (!debugConsole) return;
+      const time = new Date().toLocaleTimeString();
+      debugConsole.innerHTML += `[${time}] ${msg}\n`;
+      debugConsole.scrollTop = debugConsole.scrollHeight;
+    }
+
+    function toggleDebugConsole() {
+      debugConsole.style.display = (debugConsole.style.display === "block") ? "none" : "block";
+    }
+
+    // Detect PS4 firmware
+    (function () {
+      const ua = navigator.userAgent;
+      const m = /PlayStation\s+4[\/ ](\d+)\.(\d+)/.exec(ua);
+      if (m) {
+        let ms = parseInt(m[2], 16).toString(16);
+        if (ms.length < 2) ms = "0" + ms;
+        const key = m[1] + "." + ms;
+        badgeFw.textContent = `🎮 PS4 FW ${key}`;
+      } else {
+        badgeFw.textContent = `💻 PC Simulation`;
+      }
+    })();
+
+    // Hook Exploit Marks from jb.js
+    window.onExploitMark = function(tag, detail, raw) {
+      logToDebug(`[EXPLOIT] ${tag}${detail ? ' ' + detail : ''}`);
+      if (tag === "FW") {
+        setProgress(15, `Firmware initialized: ${detail}`);
+      } else if (tag === "PAIR-STATUS" || tag === "PRIMITIVE") {
+        setProgress(25, "Stage 1: Triggering WebKit Userland Exploit...");
+      } else if (tag === "PRIMITIVE-OK") {
+        setProgress(35, "Stage 1: WebKit R/W primitive achieved!");
+      } else if (tag === "BASES" || tag === "STUBS") {
+        setProgress(45, "Stage 2: Resolving WebKit & libkernel gadget anchors...");
+      } else if (tag.startsWith("PR-") || tag === "PIN-SPLIT") {
+        setProgress(60, "Stage 3: Spraying IPv6 sockets & triggering kernel race...");
+      } else if (tag === "KREAD-OK" || tag === "KWRITE-OK" || tag === "KRW-OK" || tag === "JB-SOURCES") {
+        setProgress(75, "Stage 3: Kernel R/W primitive established! Escalating to root...");
+      } else if (tag === "KPATCH-BLOB") {
+        setProgress(85, `Stage 4: Applying kernel stability patches (${detail})...`);
+      } else if (tag === "PAYLOAD-BLOB") {
+        setProgress(92, "Stage 4: Injecting GoldHEN payload into kernel...");
+      } else if (tag === "PROOF-SUMMARY-FINAL" || tag === "EXPM1-RESTORED") {
+        setProgress(100, "Jailbreak complete! GoldHEN loaded successfully.");
+        jailbreakBtn.innerHTML = "<span>✔ GoldHEN Active!</span>";
+        jailbreakBtn.style.background = "linear-gradient(135deg, #00ff88 0%, #00f0ff 100%)";
+      } else if (/FAIL|ERROR|THREW|ABORTED/i.test(tag)) {
+        statusLabel.textContent = `Exploit error: ${tag} (${detail || ""})`;
+        jailbreakBtn.innerHTML = "<span>⚠️ Exploit Stopped</span>";
+      }
+    };
+
+    window.onExploitFinish = function(ok) {
+      if (ok) {
+        setProgress(100, "GoldHEN is loaded! You may press the PS button.");
+        jailbreakBtn.innerHTML = "<span>✔ GoldHEN Active!</span>";
+      }
+    };
+  </script>
+
+  <!-- Auto-Execute Exploit -->
+  <script type="module">
+    import "./jb.js?v=10";
+  </script>
+</body>
+</html>
